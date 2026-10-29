@@ -140,7 +140,7 @@ context.tracing().start(new Tracing.StartOptions()
 📈 Allure-отчёт
 После прогона тестов открывается отчёт с:
 
-Overview — общая статистика (12 тестов, 100% passed).
+Overview — общая статистика (11 тестов, passed).
 
 Behaviors — группировка по CWE (Injection, XSS, Broken Access Control, Broken Authentication).
 
