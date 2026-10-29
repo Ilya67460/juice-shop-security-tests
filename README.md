@@ -4,7 +4,7 @@ markdown
 Автоматизированные тесты на уязвимости веб-приложения [OWASP Juice Shop](https://owasp.org/www-project-juice-shop/) на **Java + Playwright + JUnit 5 + Allure**.
 
 Проект демонстрирует навыки **security-тестирования** (OWASP Top 10) и построения **Page Object-фреймворка** с отчётностью.
-Ссылка на Allure Report (https://github.com/Ilya67460/juice-shop-security-tests/blob/main/allure-report/)
+
 ---
 
 ## 📊 Что покрыто (12 тестов)
