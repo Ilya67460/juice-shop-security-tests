@@ -7,8 +7,9 @@ markdown
 
 ---
 
-## 📊 Что покрыто (12 тестов)
+## 📊 Что покрыто (49 тестов из них 15 проверка на уязвимости приложения)
 
+### Security-тесты (15)
 | ID | Уязвимость | CWE | Категория |
 |----|------------|-----|-----------|
 | SEC-01 | SQL Injection в логине (blind) | CWE-89 | Injection |
@@ -23,6 +24,9 @@ markdown
 | SEC-10 | Unsigned JWT (alg:none) | CWE-347 | Broken Authentication |
 | SEC-11 | Product Tampering | CWE-639 | Broken Access Control |
 | SEC-12 | Admin Panel защита (negative test) | CWE-285 | Broken Access Control |
+| SEC-13 | SQLi: извлечение схемы БД | CWE-89 | Injection |
+| SEC-14 | SQLi: извлечение учётных данных | CWE-89 | Injection |
+| SEC-15 | SQLi: Ephemeral Accountant | CWE-89 | Injection |
 
 ---
 
@@ -141,7 +145,7 @@ context.tracing().start(new Tracing.StartOptions()
 📈 Allure-отчёт
 После прогона тестов открывается отчёт с:
 
-Overview — общая статистика (11 тестов, passed).
+Overview — общая статистика (14 — security тестов, passed).
 
 Behaviors — группировка по CWE (Injection, XSS, Broken Access Control, Broken Authentication).
 
