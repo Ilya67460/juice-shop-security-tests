@@ -10,20 +10,31 @@ markdown
 ## 📊 Что покрыто (49 тестов из них 15 проверка на уязвимости приложения)
 
 ### Security-тесты (15)
-| ID | Уязвимость | CWE | Категория |
-|----|------------|-----|-----------|
-| SEC-01 | SQL Injection в логине (blind) | CWE-89 | Injection |
-| SEC-02 | SQL Injection в логине (targeted admin) | CWE-89 | Injection |
-| SEC-03 | Reflected XSS в поиске | CWE-79 | XSS |
-| SEC-04 | DOM XSS через URL | CWE-79 | XSS |
-| SEC-05 | IDOR в API корзины | CWE-639 | Broken Access Control |
-| SEC-06 | Chain: SQLi → Admin Panel | CWE-89 + CWE-285 | Broken Access Control |
-| SEC-07 | API-only XSS (PUT /api/Products) | CWE-79 | XSS |
-| SEC-08 | Сброс пароля Jim через security question | CWE-640 | Broken Authentication |
-| SEC-09 | Forged Review (подделка отзыва) | CWE-639 | Broken Access Control |
-| SEC-10 | Unsigned JWT (alg:none) | CWE-347 | Broken Authentication |
-| SEC-11 | Product Tampering | CWE-639 | Broken Access Control |
-| SEC-12 | Admin Panel защита (negative test) | CWE-285 | Broken Access Control |
+| ID | Уязвимость | CWE | Severity |
+|----|------------|-----|----------|
+| SEC-01 | SQLi blind — обход аутентификации | CWE-89 | 🔴 CRITICAL |
+| SEC-02 | SQLi targeted — захват админа | CWE-89 | 🔴 CRITICAL |
+| SEC-03 | Reflected XSS в поиске | CWE-79 | 🟡 NORMAL |
+| SEC-04 | DOM XSS через URL | CWE-79 | 🟡 NORMAL |
+| SEC-05 | IDOR в API корзины | CWE-639 | 🔴 CRITICAL |
+| SEC-06 | Chain: SQLi → Admin Panel | CWE-89 + CWE-285 | 🔴 CRITICAL |
+| SEC-07 | API-only XSS (PUT /api/Products) | CWE-79 | 🟢 MINOR |
+| SEC-08 | Сброс пароля Jim | CWE-640 | 🔴 CRITICAL |
+| SEC-09 | Forged Review | CWE-639 | 🟢 MINOR |
+| SEC-10 | Unsigned JWT (alg:none) | CWE-347 | 🔴 CRITICAL |
+| SEC-11 | Product Tampering | CWE-639 | 🟡 NORMAL |
+| SEC-12 | Admin Panel защита (negative) | CWE-285 | 🟡 NORMAL |
+| SEC-13 | SQLi: извлечение схемы БД | CWE-89 | 🔴 CRITICAL |
+| SEC-14 | SQLi: извлечение учётных данных | CWE-89 | 🔴 CRITICAL |
+| SEC-15 | SQLi: Ephemeral Accountant | CWE-89 | 🔴 CRITICAL |
+
+### Функциональные тесты (34)
+
+- **Регистрация (RG-01…RG-10):** валидные данные, невалидный email, пустой email, email на другом языке, существующий email, пароли (короткий, только цифры, длинный, со спецсимволами).
+- **Логин (LG-01…LG-05):** успешный вход, неверный пароль, несуществующий email, logout, проверка JWT.
+- **Товары (INV-01…INV-06):** количество (37), поля карточки (название, цена, кнопка), детальная карточка, добавление в корзину, удаление.
+- **Корзина:** счётчик, добавление/удаление по индексу.
+- **Оформление заказа (CHK-01…CHK-02):** форма адреса, переход к выбору доставки.
 
 ---
 
@@ -143,10 +154,7 @@ context.tracing().start(new Tracing.StartOptions()
 📈 Allure-отчёт
 После прогона тестов открывается отчёт с:
 
-Overview — общая статистика (14 — security тестов, passed).
-
-Behaviors — группировка по CWE (Injection, XSS, Broken Access Control, Broken Authentication).
-
-Suites — по классам (SecurityTest, RegisterTest, …).
-
-Attachments — JSON-ответы IDOR, JWT, скриншоты.
+- **Overview** — общая статистика (**49 тестов**, из них **14 security**, passed).
+- **Behaviors** — группировка по CWE (Injection, XSS, Broken Access Control, Broken Authentication).
+- **Suites** — по классам (`SecurityTest`, `RegisterTest`, `LoginTest`, `InventoryTest`).
+- **Attachments** — JSON-ответы IDOR, JWT, SQLi (schema, credentials), скриншоты.
