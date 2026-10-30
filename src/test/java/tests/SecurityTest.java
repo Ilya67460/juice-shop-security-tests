@@ -3,14 +3,14 @@ package tests;
 import base.BaseTest;
 import com.microsoft.playwright.Locator;
 import config.TestConfig;
-import io.qameta.allure.Epic;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Owner;
+import io.qameta.allure.*;
 import org.junit.jupiter.api.*;
 import pages.LoginPage;
 import pages.SecurityPage;
 import pages.XssPage;
 import utils.ScreenshotsSelective;
+
+import static io.qameta.allure.SeverityLevel.CRITICAL;
 //import io.qameta.allure.playwright.AllurePlaywright;
 
 /**
@@ -36,6 +36,7 @@ public class SecurityTest extends BaseTest {
     @Test
     @Order(1)
     @DisplayName("SEC-01: Войти в личный кабинет Admin с помощь SQL-инъекции(CWE-89)")
+    @Severity(SeverityLevel.CRITICAL)
     void wrongUserLogin() {
         loginPage
                 .loginAs("admin@juice-sh.op' OR '1'='1'--", TestConfig.getInvalidPassword3())
@@ -48,6 +49,7 @@ public class SecurityTest extends BaseTest {
     @Test
     @Order(2)
     @DisplayName("SEC-02: Reflected XSS в поиске (CWE-79)")
+    @Severity(SeverityLevel.CRITICAL)
     void reflectedXssInSearch() {
         loginPage
                 .clickDismiss();
@@ -63,6 +65,7 @@ public class SecurityTest extends BaseTest {
     @Test
     @Order(3)
     @DisplayName("SEC-03: DOM XSS через параметр URL (CWE-79)")
+    @Severity(SeverityLevel.NORMAL)
     void domXssInSearch() {
         XssPage xssPage = new XssPage(page);
         // Payload из официального решения
@@ -75,6 +78,7 @@ public class SecurityTest extends BaseTest {
     @Test
     @Order(4)
     @DisplayName("SEC-04: IDOR в API корзины — доступ к чужой корзине (CWE-639)")
+    @Severity(SeverityLevel.NORMAL)
     void idorInBasket() {
         // 1. Логинимся как обычный пользователь
         loginPage.loginAs(TestConfig.getStandardUser(), TestConfig.getPassword());
@@ -99,6 +103,7 @@ public class SecurityTest extends BaseTest {
     @Test
     @Order(5)
     @DisplayName("SEC-05: Доступ к админ-панели без прав администратора (CWE-285)")
+    @Severity(SeverityLevel.CRITICAL)
     void adminSectionAccess() {
         // Логинимся как обычный пользователь (не админ)
         loginPage.loginAs(TestConfig.getStandardUser(), TestConfig.getPassword());
@@ -112,6 +117,7 @@ public class SecurityTest extends BaseTest {
     @Test
     @Order(6)
     @DisplayName("SEC-06: Цепочка SQLi → доступ к админ-панели (CWE-89 + CWE-285)")
+    @Severity(SeverityLevel.CRITICAL)
     void adminSectionAfterSqli() {
         // 1. Захватываем админа через SQLi
         loginPage.loginAs("' OR '1'='1'--", "any_password");
@@ -141,6 +147,7 @@ public class SecurityTest extends BaseTest {
     @Test
     @Order(7)
     @DisplayName("SEC-07: Stored XSS в отзывах (CWE-79)")
+    @Severity(SeverityLevel.MINOR)
     void storedXssInReview() {
         // Логинимся (отзывы требуют авторизации)
         loginPage.loginAs(TestConfig.getStandardUser(), TestConfig.getPassword());
@@ -154,6 +161,7 @@ public class SecurityTest extends BaseTest {
     @Test
     @Order(8)
     @DisplayName("SEC-08: API-only XSS через изменение описания товара (CWE-79)")
+    @Severity(SeverityLevel.CRITICAL)
     void apiOnlyXss() {
         // 1. Захватываем админа через SQLi (нужны права на PUT /api/products)
         loginPage.loginAs("' OR '1'='1'--", "any_password");
@@ -169,6 +177,7 @@ public class SecurityTest extends BaseTest {
     @Test
     @Order(9)
     @DisplayName("SEC-09: Сброс пароля Jim через security question (CWE-640)")
+    @Severity(SeverityLevel.MINOR)
     void resetJimPassword() {
         loginPage
                 .clickDismiss();
@@ -198,6 +207,7 @@ public class SecurityTest extends BaseTest {
     @Test
     @Order(10)
     @DisplayName("SEC-10: Подделка отзыва от имени другого пользователя (CWE-639)")
+    @Severity(SeverityLevel.CRITICAL)
     void forgedReview() {
         // Логинимся как обычный пользователь
         loginPage.loginAs(TestConfig.getStandardUser(), TestConfig.getPassword());
@@ -219,6 +229,7 @@ public class SecurityTest extends BaseTest {
     @Test
     @Order(11)
     @DisplayName("SEC-11: Unsigned JWT (alg:none) обходит аутентификацию (CWE-347)")
+    @Severity(SeverityLevel.NORMAL)
     void unsignedJwt() {
         // Логинимся, чтобы страница была в «нормальном» состоянии
         loginPage.loginAs(TestConfig.getStandardUser(), TestConfig.getPassword());
@@ -230,6 +241,7 @@ public class SecurityTest extends BaseTest {
     @Test
     @Order(12)
     @DisplayName("SEC-12: Подмена описания товара обычным пользователем (CWE-639)")
+    @Severity(SeverityLevel.NORMAL)
     void productTampering() {
         loginPage.loginAs(TestConfig.getStandardUser(), TestConfig.getPassword());
 
@@ -262,6 +274,35 @@ public class SecurityTest extends BaseTest {
             throw new AssertionError("Описание не изменилось!");
         }
         System.out.println(">>> Подмена подтверждена: '" + descBefore + "' → '" + descAfter + "'");
+    }
+    @Test
+    @Order(13)
+    @DisplayName("SEC-13: SQLi извлечение схемы БД (CWE-89)")
+    @Story("SQL Injection: Database Schema Extraction")
+    @Severity(SeverityLevel.CRITICAL)
+    void databaseSchemaExtraction() {
+        SecurityPage securityPage = new SecurityPage(page);
+        securityPage.extractDbSchema();
+        page.waitForTimeout(1000);
+        ScreenshotsSelective.capture(null, page);
+    }
+    @Test
+    @Order(14)
+    @DisplayName("SEC-14: SQLi — извлечение учётных данных пользователей (CWE-89)")
+    @Story("SQL Injection: User Credentials Extraction")
+    @Severity(SeverityLevel.CRITICAL)
+    void userCredentialsExtraction() {
+        SecurityPage securityPage = new SecurityPage(page);
+        securityPage.extractUserCredentials();
+    }
+    @Test
+    @Order(15)
+    @DisplayName("SEC-15: SQLi — Ephemeral Accountant (вход под несуществующим бухгалтером, CWE-89)")
+    @Story("SQL Injection: Ephemeral Accountant")
+    @Severity(SeverityLevel.CRITICAL)
+    void ephemeralAccountantLogin() {
+        SecurityPage securityPage = new SecurityPage(page);
+        securityPage.loginAsEphemeralAccountant();
     }
 }
 
