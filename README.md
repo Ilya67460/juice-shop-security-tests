@@ -24,9 +24,6 @@ markdown
 | SEC-10 | Unsigned JWT (alg:none) | CWE-347 | Broken Authentication |
 | SEC-11 | Product Tampering | CWE-639 | Broken Access Control |
 | SEC-12 | Admin Panel защита (negative test) | CWE-285 | Broken Access Control |
-| SEC-13 | SQLi: извлечение схемы БД | CWE-89 | Injection |
-| SEC-14 | SQLi: извлечение учётных данных | CWE-89 | Injection |
-| SEC-15 | SQLi: Ephemeral Accountant | CWE-89 | Injection |
 
 ---
 
