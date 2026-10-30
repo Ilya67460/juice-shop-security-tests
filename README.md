@@ -42,7 +42,9 @@ markdown
 - **Postman** — ручная проверка API
 
 ---
-![Allure Overview](164304.png)
+![Allure Overview](2026-10-30 112733.png)
+![Allure Overview](2026-10-30 132700.png)
+![Allure Overview](2026-10-30 132744.png)
 
 ## 🚀 Как запустить
 
