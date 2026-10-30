@@ -1,4 +1,3 @@
-<img width="1826" height="914" alt="2026-10-30 112733" src="https://github.com/user-attachments/assets/83e632f8-2ca1-4a22-9d72-bcff8a751b5c" />
 markdown
 # 🛡️ Security Automation Portfolio — OWASP Juice Shop
 
